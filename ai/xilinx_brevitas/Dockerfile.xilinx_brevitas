@@ -1,0 +1,43 @@
+FROM nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04
+
+LABEL maintainer="Kelvin Wu <kelvinyu1117@gmail.com>" 
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+SHELL ["/bin/bash", "-c"]
+
+RUN echo $SHELL && apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    python-dev \
+    python-pip \
+    tzdata \
+    vim
+
+
+RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh -O ~/anaconda.sh \
+    && /bin/bash ~/anaconda.sh -b -p /opt/conda \
+    && rm ~/anaconda.sh \
+    && echo "export PATH=/opt/conda/bin:$PATH" >> ~/.bashrc \
+    && /bin/bash -c "source ~/.bashrc"
+
+
+ENV PATH /opt/conda/bin:$PATH
+
+RUN echo $PATH \
+    && source ~/.bashrc \
+    && conda --version \ 
+    && conda init \
+    && conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch \
+    && pip install git+https://github.com/Xilinx/brevitas.git
+
+
+
+# expoose the port for jupyter notebook
+EXPOSE 8888
+
+WORKDIR /workspace
+
+
